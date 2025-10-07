@@ -63,3 +63,6 @@ coverage.xml
 /staticfiles/
 # macOS
 .DS_Store
+# Environment variables
+.env
+

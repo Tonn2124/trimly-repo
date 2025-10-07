@@ -73,12 +73,33 @@ trimly/
 └── manage.py              # Django management script
 ```
 
-## Database Configuration
+## Recent Changes (October 8, 2025)
 
-The project supports both PostgreSQL (Supabase) and SQLite:
+### Supabase Session Pooler Integration
+- Switched from Transaction Pooler to Session Pooler for better connection management
+- Updated database configuration to use `DATABASE_URL` format
+- Added SSL mode requirement for secure connections
+- Improved connection pooling efficiency
 
-- **PostgreSQL/Supabase**: Used in production and when all database environment variables are set in `.env`
-- **SQLite**: Automatically used as fallback for local development when PostgreSQL credentials are not configured
+### Database Configuration
+
+The project now supports both PostgreSQL (Supabase Session Pooler) and SQLite:
+
+#### Supabase PostgreSQL Setup
+Create a `.env` file in the `trimly` directory with:
+```
+DATABASE_URL='postgresql://postgres.thkruwxuxwktiarugphd:[YOUR-PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres'
+```
+
+Benefits of Session Pooler:
+- Maintains persistent database connections
+- More efficient for Django's connection pooling
+- Better performance for multiple queries in the same session
+- Improved connection stability
+
+#### Local Development
+- SQLite is used automatically if no `DATABASE_URL` is configured
+- No additional setup required for local development
 
 ## Contributing
 
