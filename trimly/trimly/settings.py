@@ -89,20 +89,26 @@ WSGI_APPLICATION = 'trimly.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# If all required database environment variables are present, use PostgreSQL
-if all(os.getenv(var) for var in ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST']):
+# Use DATABASE_URL if provided (for Supabase Session Pooler), otherwise fallback to SQLite
+database_url = os.getenv('DATABASE_URL')
+if database_url:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'NAME': 'postgres',
+            'USER': database_url.split(':')[1].split('//')[1].split(':')[0],
+            'PASSWORD': database_url.split(':')[2].split('@')[0],
+            'HOST': database_url.split('@')[1].split(':')[0],
+            'PORT': database_url.split(':')[-1].split('/')[0],
+            'OPTIONS': {
+                # Session pooler specific settings
+                'sslmode': 'require',
+                'application_name': 'trimly_django',
+            }
         }
     }
 else:
-    # Fallback to SQLite for development if PostgreSQL credentials are not configured
+    # Fallback to SQLite for development if DATABASE_URL is not configured
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
