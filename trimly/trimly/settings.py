@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()  # ✅ Loads your .env variables
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -73,12 +79,42 @@ WSGI_APPLICATION = 'trimly.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
+
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# Use DATABASE_URL if provided (for Supabase Session Pooler), otherwise fallback to SQLite
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': database_url.split(':')[1].split('//')[1].split(':')[0],
+            'PASSWORD': database_url.split(':')[2].split('@')[0],
+            'HOST': database_url.split('@')[1].split(':')[0],
+            'PORT': database_url.split(':')[-1].split('/')[0],
+            'OPTIONS': {
+                # Session pooler specific settings
+                'sslmode': 'require',
+                'application_name': 'trimly_django',
+            }
+        }
     }
-}
+else:
+    # Fallback to SQLite for development if DATABASE_URL is not configured
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
